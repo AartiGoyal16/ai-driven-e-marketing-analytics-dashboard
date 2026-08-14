@@ -1,0 +1,14 @@
+# notes
+local-readme.md
+
+# Environment Variables
+.env
+api-gateway/.env
+
+# Node dependencies
+node-modules/
+api-gateway/node_modules/
+
+# Logs
+*.log
+

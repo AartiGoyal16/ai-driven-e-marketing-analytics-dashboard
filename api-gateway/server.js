@@ -3,6 +3,8 @@ const {ApolloServer}=require("@apollo/server");
 const {expressMiddleware}=require("@as-integrations/express5");
 const cors=require("cors");
 const dotenv=require("dotenv");
+const cookieParser=require("cookie-parser");
+const jwt=require('jsonwebtoken');
 
 dotenv.config();
 
@@ -24,9 +26,30 @@ async function startServer() {
 
     await server.start();
 
-    app.use(cors());
+    app.use(cors({
+        origin:['http://localhost:3000','https://studio.apollographql.com'],
+        credentials: true,
+    }));
+
     app.use(express.json());
-    app.use('/graphql',expressMiddleware(server));
+    app.use(cookieParser());
+    app.use('/graphql',expressMiddleware(server,{
+        context: async({req,res})=>{
+            let user=null;
+            const token=req.cookies.token;
+
+            if(token){
+                try{
+                    user=jwt.verify(token,process.env.JWT_SECRET);
+                }
+                catch(err){
+                    console.log("Invalid or expired token");
+                }
+            }
+
+            return {req,res,user};
+        }
+    }));
 
     const PORT=process.env.PORT||4000;
 

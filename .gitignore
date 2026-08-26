@@ -12,3 +12,6 @@ api-gateway/node_modules/
 # Logs
 *.log
 
+ml-engine/_pycache__/
+ml_engine/venv/
+

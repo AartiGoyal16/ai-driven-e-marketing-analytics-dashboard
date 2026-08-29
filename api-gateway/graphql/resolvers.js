@@ -1,5 +1,6 @@
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
+const {redisClient}=require('../config/redis');
 const {DateTimeResolver}=require('graphql-scalars');
 const {getAllCampaigns,createCampaign,updateCampaign,deleteCampaign}=require('../models/campaignModel');
 const {createUser,getUserByEmail,getUserById}=require('../models/userModel');
@@ -37,18 +38,35 @@ const resolvers={
         getCampaignPrediction: async(_,{platform,budget,status},context)=>{
             requireAuth(context);
 
+            const cacheKey=`prediction:${platform}:${budget}:${status}`;
+
             try{
-                const response=await fetch('http://127.0.0.1:8000/predict',{
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({platform,budget,status})
+                const cachedData=await redisClient.get(cacheKey);
+
+                if(cachedData){
+                    console.log('Serving prediction from Redis Cache!');
+                    return JSON.parse(cachedData);
+                }
+
+                console.log('Cache miss. Asking Python AI Engine...');
+
+                const mlUrl=`${process.env.ML_ENGINE_URL}/predict`;
+
+                const response=await fetch(mlUrl,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({platform,budget,status})
                 });
 
                 if(!response.ok){
                     throw new Error('ML Engine is currently unreachable');
                 }
 
-                return await response.json()
+                const predictionData=await response.json();
+
+                await redisClient.setEx(cacheKey,3600,JSON.stringify(predictionData))
+
+                return predictionData;
             }
             catch(error){
                 console.error('Microservice communication error:',error);

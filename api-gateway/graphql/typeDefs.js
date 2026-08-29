@@ -1,6 +1,12 @@
 const typeDefs=`
     scalar DateTime
 
+    type Prediction{
+        status:String!
+        predicted_roi: Float!
+        message: String!
+    }
+
     type Campaign{
         id:ID!
         name:String!
@@ -19,6 +25,7 @@ const typeDefs=`
     type Query{
         getAllCampaigns: [Campaign!]!
         me: User
+        getCampaignPrediction(platform: String!, budget: Float!, status: String!): Prediction!
     }
 
     type Mutation{

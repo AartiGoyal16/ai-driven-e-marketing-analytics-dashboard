@@ -33,6 +33,27 @@ const resolvers={
         me:async(_,__,context)=>{
             if(!context.user) return null;
             return await getUserById(context.user.userId);
+        },
+        getCampaignPrediction: async(_,{platform,budget,status},context)=>{
+            requireAuth(context);
+
+            try{
+                const response=await fetch('http://127.0.0.1:8000/predict',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({platform,budget,status})
+                });
+
+                if(!response.ok){
+                    throw new Error('ML Engine is currently unreachable');
+                }
+
+                return await response.json()
+            }
+            catch(error){
+                console.error('Microservice communication error:',error);
+                throw new Error('Failed to fetch AI prediction.');
+            }
         }
     },
 

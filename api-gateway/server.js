@@ -27,7 +27,7 @@ async function startServer() {
     await server.start();
 
     app.use(cors({
-        origin:['http://localhost:3000','https://studio.apollographql.com'],
+        origin:['http://localhost:3000','http://localhost:3001','https://studio.apollographql.com'],
         credentials: true,
     }));
 

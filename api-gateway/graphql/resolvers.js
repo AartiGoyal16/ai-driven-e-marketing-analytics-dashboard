@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { redisClient } = require('../config/redis');
 const { DateTimeResolver } = require('graphql-scalars');
-const { getAllCampaigns, createCampaign, updateCampaign, deleteCampaign } = require('../models/campaignModel');
+const { getAllCampaigns, createCampaign, updateCampaign, deleteCampaign, getDailyMetrics } = require('../models/campaignModel');
 const { createUser, getUserByEmail, getUserById } = require('../models/userModel');
 
 const setAuthCookie = (res, user) => {
@@ -32,6 +32,7 @@ const resolvers = {
 
     Query: {
         getAllCampaigns: async () => await getAllCampaigns(),
+        getDailyMetrics: async (_, { campaignId }) => await getDailyMetrics(campaignId),
         me: async (_, __, context) => {
             if (!context.user) return null;
             return await getUserById(context.user.userId);

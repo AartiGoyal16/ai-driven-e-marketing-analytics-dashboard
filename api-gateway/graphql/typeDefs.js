@@ -27,8 +27,19 @@ const typeDefs = `
         role: String!
     }
 
+    type DailyMetric {
+        id: ID!
+        campaign_id: ID!
+        date: String!
+        impressions: Int!
+        clicks: Int!
+        spend: Float!
+        conversions: Int!
+    }
+
     type Query {
         getAllCampaigns: [Campaign!]!
+        getDailyMetrics(campaignId: ID): [DailyMetric!]!
         me: User
         getCampaignPrediction(platform: String!, budget: Float!, status: String!): Prediction!
     }

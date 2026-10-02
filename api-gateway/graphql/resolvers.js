@@ -40,7 +40,9 @@ const resolvers = {
         getCampaignPrediction: async (_, { platform, budget, status }, context) => {
             requireAuth(context);
 
-            const cacheKey = `prediction:${platform}:${budget}:${status}`;
+            const platformNorm = (platform || '').trim().toLowerCase();
+            const statusNorm = (status || '').trim().toLowerCase();
+            const cacheKey = `prediction:${platformNorm}:${budget}:${statusNorm}`;
 
             try {
                 const cachedData = await redisClient.get(cacheKey);
@@ -57,7 +59,7 @@ const resolvers = {
                 const response = await fetch(mlUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ platform, budget, status })
+                    body: JSON.stringify({ platform: platformNorm, budget, status: statusNorm })
                 });
 
                 if (!response.ok) {

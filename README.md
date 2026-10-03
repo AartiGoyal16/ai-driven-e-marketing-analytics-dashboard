@@ -185,9 +185,3 @@ mutation Login($email: String!, $password: String!) {
   }
 }
 ```
-
----
-
-## 🛡️ License & Acknowledgments
-
-Developed as part of the BE(CSE) degree at Chitkara University, Himachal Pradesh.

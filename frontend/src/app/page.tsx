@@ -447,18 +447,18 @@ export default function DashboardPage() {
                     <div className="bg-gray-900 p-6 rounded-2xl border border-gray-800">
                       <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Estimated Clicks</p>
                       <p className="text-4xl font-extrabold text-blue-400 mt-2">
-                        {typeof prediction.predictedClicks === 'number' && prediction.predictedClicks > 0
+                        {typeof prediction.predictedClicks === 'number'
                           ? prediction.predictedClicks.toLocaleString()
-                          : Math.round(Number(predBudget) * 1.45).toLocaleString()}
+                          : 'N/A'}
                       </p>
                     </div>
 
                     <div className="bg-gray-900 p-6 rounded-2xl border border-gray-800">
                       <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Estimated Conversions</p>
                       <p className="text-4xl font-extrabold text-purple-400 mt-2">
-                        {typeof prediction.predictedConversions === 'number' && prediction.predictedConversions > 0
+                        {typeof prediction.predictedConversions === 'number'
                           ? prediction.predictedConversions.toLocaleString()
-                          : Math.round(Number(predBudget) * 0.12).toLocaleString()}
+                          : 'N/A'}
                       </p>
                     </div>
 
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                       <p className="text-4xl font-extrabold text-amber-400 mt-2">
                         {typeof prediction.confidenceScore === 'number'
                           ? `${(prediction.confidenceScore * 100).toFixed(0)}%`
-                          : '95%'}
+                          : 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -507,44 +507,53 @@ export default function DashboardPage() {
                 <span className="text-xs text-gray-400">Aggregated from PostgreSQL daily_metrices table</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {metrics.map((m: any) => {
-                  const ctr = m.impressions > 0 ? ((m.clicks / m.impressions) * 100).toFixed(2) : '0.00';
-                  const cpc = m.clicks > 0 ? (m.spend / m.clicks).toFixed(2) : '0.00';
-                  return (
-                    <div key={m.id} className="bg-gray-950 border border-gray-800 rounded-xl p-5 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-blue-400 uppercase">Date: {m.date}</span>
-                        <span className="text-xs text-gray-500">ID #{m.campaign_id}</span>
-                      </div>
+              {metrics.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 space-y-2 border border-dashed border-gray-800 rounded-2xl">
+                  <p className="text-sm font-semibold text-gray-400">No daily performance metrics logged in PostgreSQL database.</p>
+                  <p className="text-xs max-w-md mx-auto">
+                    Run setupDB.js or insert daily metric entries into your PostgreSQL database to view CTR and CPC performance analytics.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {metrics.map((m: any) => {
+                    const ctr = m.impressions > 0 ? ((m.clicks / m.impressions) * 100).toFixed(2) : '0.00';
+                    const cpc = m.clicks > 0 ? (m.spend / m.clicks).toFixed(2) : '0.00';
+                    return (
+                      <div key={m.id} className="bg-gray-950 border border-gray-800 rounded-xl p-5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-semibold text-blue-400 uppercase">Date: {m.date}</span>
+                          <span className="text-xs text-gray-500">ID #{m.campaign_id}</span>
+                        </div>
 
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                          <p className="text-gray-400">Impressions</p>
-                          <p className="text-base font-bold text-white">{Number(m.impressions).toLocaleString()}</p>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <p className="text-gray-400">Impressions</p>
+                            <p className="text-base font-bold text-white">{Number(m.impressions).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">Clicks</p>
+                            <p className="text-base font-bold text-blue-400">{Number(m.clicks).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">Spend</p>
+                            <p className="text-base font-bold text-emerald-400">${Number(m.spend).toFixed(2)}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">Conversions</p>
+                            <p className="text-base font-bold text-purple-400">{Number(m.conversions)}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-gray-400">Clicks</p>
-                          <p className="text-base font-bold text-blue-400">{Number(m.clicks).toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400">Spend</p>
-                          <p className="text-base font-bold text-emerald-400">${Number(m.spend).toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400">Conversions</p>
-                          <p className="text-base font-bold text-purple-400">{Number(m.conversions)}</p>
-                        </div>
-                      </div>
 
-                      <div className="pt-3 border-t border-gray-800/80 flex justify-between text-xs text-gray-400">
-                        <span>CTR: <strong className="text-white">{ctr}%</strong></span>
-                        <span>CPC: <strong className="text-white">${cpc}</strong></span>
+                        <div className="pt-3 border-t border-gray-800/80 flex justify-between text-xs text-gray-400">
+                          <span>CTR: <strong className="text-white">{ctr}%</strong></span>
+                          <span>CPC: <strong className="text-white">${cpc}</strong></span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}

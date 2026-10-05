@@ -1,6 +1,6 @@
 # AI-Driven Marketing Analytics & Predictive ROI Platform
 
-A distributed marketing analytics and predictive ROI platform built on a decoupled microservices architecture. The platform isolates high-throughput web traffic from heavy machine learning computations, providing real-time campaign ROI forecasting, daily performance metrics tracking, campaign CRUD management, secure JWT authentication, and high-speed Redis caching.
+A distributed marketing analytics and predictive ROI platform built on a decoupled microservices architecture. The platform isolates high-throughput web traffic from heavy machine learning computations, providing on-demand campaign ROI forecasting, daily performance metrics tracking, campaign CRUD management, secure JWT authentication, and high-speed Redis caching.
 
 ---
 
@@ -51,7 +51,7 @@ A distributed marketing analytics and predictive ROI platform built on a decoupl
 ## ✨ Core Engineering Features
 
 1. **Decoupled Machine Learning Inference**:
-   - Heavy data-science calculations (Scikit-Learn Random Forest Regressors) are isolated inside a Python FastAPI microservice, preventing event loop blocking on the Node.js API Gateway.
+   - Heavy data-science calculations (Scikit-Learn Random Forest Regressors) are isolated inside a Python FastAPI microservice, keeping ML computation isolated from the Node.js API Gateway.
    - Computes ML predictions for **Predicted ROI**, **Estimated Clicks**, **Estimated Conversions**, and a **Dynamic Model Confidence Score** based on tree ensemble variance across 100 decision trees.
    - Case-insensitive platform normalization for `Google`, `Meta`/`Facebook`, `Instagram`, `LinkedIn`, `TikTok`, `Twitter`, and `YouTube`.
 

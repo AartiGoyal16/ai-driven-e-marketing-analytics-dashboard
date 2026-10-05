@@ -42,7 +42,7 @@ A distributed marketing analytics and predictive ROI platform built on a decoupl
 | :--- | :--- | :--- | :--- |
 | **`frontend/`** | Next.js (App Router), React 19, TypeScript, Tailwind CSS, Apollo Client | **`3000`** | Responsive single-page dashboard featuring campaign CRUD management, interactive AI ROI prediction tool, and daily metrics visualization. |
 | **`api-gateway/`** | Node.js, Express, Apollo Server, GraphQL, JWT, Redis Client, `pg` | **`4000`** | Central API entry point managing GraphQL schemas, JWT auth via HTTP-only cookies, SQL persistence, and 1-hour Redis prediction caching. |
-| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, NumPy, Uvicorn | **`8000`** | Machine learning microservice using a synthetically generated dataset of 1,500 campaign observations using Random Forest Regressors for multi-metric regression forecasting. |
+| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, NumPy, Uvicorn | **`8000`** | Machine learning microservice trained on a synthetically generated dataset of 1,500 campaign observations using Random Forest Regressors for multi-metric regression forecasting. |
 | **Redis** | Redis 7 Alpine (Dockerized) | **`6379`** | In-memory cache key store (`prediction:{platform}:{budget}:{status}`) with 3600s TTL to prevent duplicate ML computations. |
 | **PostgreSQL** | PostgreSQL 15 Alpine (Dockerized) | **`5432`** | Relational data persistence storing Users, Campaigns, and Daily Performance Metrics tables. |
 

@@ -1,6 +1,6 @@
 # AI-Driven Marketing Analytics & Predictive ROI Platform
 
-A distributed, enterprise-grade marketing analytics platform built on a decoupled microservices architecture. The platform isolates high-throughput web traffic from heavy machine learning computations, providing real-time campaign ROI forecasting, daily performance metrics tracking, campaign CRUD management, secure JWT authentication, and high-speed Redis caching.
+A distributed marketing analytics and predictive ROI platform built on a decoupled microservices architecture. The platform isolates high-throughput web traffic from heavy machine learning computations, providing real-time campaign ROI forecasting, daily performance metrics tracking, campaign CRUD management, secure JWT authentication, and high-speed Redis caching.
 
 ---
 
@@ -42,7 +42,7 @@ A distributed, enterprise-grade marketing analytics platform built on a decouple
 | :--- | :--- | :--- | :--- |
 | **`frontend/`** | Next.js (App Router), React 19, TypeScript, Tailwind CSS, Apollo Client | **`3000`** | Responsive single-page dashboard featuring campaign CRUD management, interactive AI ROI prediction tool, and daily metrics visualization. |
 | **`api-gateway/`** | Node.js, Express, Apollo Server, GraphQL, JWT, Redis Client, `pg` | **`4000`** | Central API entry point managing GraphQL schemas, JWT auth via HTTP-only cookies, SQL persistence, and 1-hour Redis prediction caching. |
-| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, NumPy, Uvicorn | **`8000`** | Machine learning microservice trained on 1,500 historical campaign dataset samples using Random Forest Regressors for multi-metric regression forecasting. |
+| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, NumPy, Uvicorn | **`8000`** | Machine learning microservice using a synthetically generated dataset of 1,500 campaign observations using Random Forest Regressors for multi-metric regression forecasting. |
 | **Redis** | Redis 7 Alpine (Dockerized) | **`6379`** | In-memory cache key store (`prediction:{platform}:{budget}:{status}`) with 3600s TTL to prevent duplicate ML computations. |
 | **PostgreSQL** | PostgreSQL 15 Alpine (Dockerized) | **`5432`** | Relational data persistence storing Users, Campaigns, and Daily Performance Metrics tables. |
 

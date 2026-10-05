@@ -1,96 +1,110 @@
-# Predictive ROI Modeling & Marketing Analytics Platform
+# AI-Driven Marketing Analytics & Predictive ROI Platform
 
-A distributed, AI-powered marketing analytics platform built using a modern microservices architecture. The platform decouples fast web traffic routing from heavy machine learning computations, providing predictive ROI modeling, campaign CRUD operations, daily performance tracking, secure JWT authentication, and intelligent Redis caching.
-
----
-
-## 🎓 Project Details
-
-- **Project Title:** Predictive ROI Modeling and Marketing Analytics Platform via Distributed Microservices
-- **Department:** Computer Science and Engineering, Chitkara University, Himachal Pradesh
-- **Submitted By:** Aarti (University ID: 2311981007)
-- **Degree:** BE(CSE)
+A distributed, enterprise-grade marketing analytics platform built on a decoupled microservices architecture. The platform isolates high-throughput web traffic from heavy machine learning computations, providing real-time campaign ROI forecasting, daily performance metrics tracking, campaign CRUD management, secure JWT authentication, and high-speed Redis caching.
 
 ---
 
-## 🏗️ Microservices Architecture & Port Mapping
+## 🏗️ Architecture & System Design
 
 ```text
-[ Next.js Frontend ]  --->  [ Node.js API Gateway ]  <--->  [ Python ML Engine ]
-   (Port 3000)                  (Port 4000)                   (Port 8000)
-                                    |                              |
-                                    v                              v
-                           [ PostgreSQL DB ]               [ Redis Cache ]
-                              (Port 5432)                    (Port 6379)
+                               ┌──────────────────────────┐
+                               │     Next.js Frontend     │
+                               │        (Port 3000)       │
+                               └────────────┬─────────────┘
+                                            │
+                                            │ GraphQL / Cookie Auth
+                                            v
+                               ┌──────────────────────────┐
+                               │    Node.js API Gateway   │
+                               │        (Port 4000)       │
+                               └──────┬────────────┬──────┘
+                                      │            │
+                    Redis Cache (TTL) │            │ Internal REST API
+                                      v            v
+                           ┌─────────────┐    ┌──────────────────────────┐
+                           │ Redis Cache │    │    Python AI/ML Engine   │
+                           │ (Port 6379) │    │        (Port 8000)       │
+                           └─────────────┘    └──────────────────────────┘
+                                      │
+                                      │ SQL Persistence
+                                      v
+                           ┌─────────────────────┐
+                           │    PostgreSQL DB    │
+                           │     (Port 5432)     │
+                           └─────────────────────┘
 ```
 
-| Service | Technology Stack | Port | Description |
+---
+
+## 🚀 Repository Architecture & Microservices Breakdown
+
+| Service | Tech Stack | Port | Primary Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **`frontend/`** | Next.js (App Router), React 19, TypeScript, Tailwind CSS, Apollo Client | **`3000`** | User Interface for campaign CRUD, AI ROI prediction dashboard, and daily metrics visualization. |
-| **`api-gateway/`** | Node.js, Express, Apollo Server, GraphQL, JWT, Redis Client, `pg` | **`4000`** | Central entry point processing GraphQL queries, managing auth cookies, DB persistence, and Redis caching. |
-| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, Uvicorn | **`8000`** | AI microservice training Scikit-Learn Random Forest Regression models to predict campaign ROI and performance metrics. |
-| **Redis** | Redis 7 Alpine (Docker) | **`6379`** | In-Memory cache storing AI prediction results (`prediction:{platform}:{budget}:{status}`) with 3600s TTL. |
-| **PostgreSQL** | PostgreSQL 15 Alpine (Docker) | **`5432`** | Primary relational database storing Users, Campaigns, and Daily Performance Metrics tables. |
+| **`frontend/`** | Next.js (App Router), React 19, TypeScript, Tailwind CSS, Apollo Client | **`3000`** | Responsive single-page dashboard featuring campaign CRUD management, interactive AI ROI prediction tool, and daily metrics visualization. |
+| **`api-gateway/`** | Node.js, Express, Apollo Server, GraphQL, JWT, Redis Client, `pg` | **`4000`** | Central API entry point managing GraphQL schemas, JWT auth via HTTP-only cookies, SQL persistence, and 1-hour Redis prediction caching. |
+| **`ml-engine/`** | Python 3, FastAPI, Scikit-Learn, Pandas, NumPy, Uvicorn | **`8000`** | Machine learning microservice trained on 1,500 historical campaign dataset samples using Random Forest Regressors for multi-metric regression forecasting. |
+| **Redis** | Redis 7 Alpine (Dockerized) | **`6379`** | In-memory cache key store (`prediction:{platform}:{budget}:{status}`) with 3600s TTL to prevent duplicate ML computations. |
+| **PostgreSQL** | PostgreSQL 15 Alpine (Dockerized) | **`5432`** | Relational data persistence storing Users, Campaigns, and Daily Performance Metrics tables. |
 
 ---
 
-## ✨ Key Features & Technical Highlights
+## ✨ Core Engineering Features
 
-1. **AI-Driven Predictive Analytics**:
-   - Uses Scikit-Learn `RandomForestRegressor` and `ColumnTransformer` pipelines trained on campaign features (`platform`, `budget`, `status`).
-   - Automatically normalizes input platform strings (case-insensitive handling for `Google`, `Meta`/`Facebook`, `LinkedIn`, `TikTok`).
-   - Predicts ROI multipliers, estimated clicks, estimated conversions, and confidence scores.
+1. **Decoupled Machine Learning Inference**:
+   - Heavy data-science calculations (Scikit-Learn Random Forest Regressors) are isolated inside a Python FastAPI microservice, preventing event loop blocking on the Node.js API Gateway.
+   - Computes ML predictions for **Predicted ROI**, **Estimated Clicks**, **Estimated Conversions**, and a **Dynamic Model Confidence Score** based on tree ensemble variance across 100 decision trees.
+   - Case-insensitive platform normalization for `Google`, `Meta`/`Facebook`, `Instagram`, `LinkedIn`, `TikTok`, `Twitter`, and `YouTube`.
 
-2. **Decoupled Architecture & Redis Caching**:
-   - Isolates heavy machine learning model inference from high-speed web traffic.
-   - Node.js Gateway checks Redis cache first before querying the Python ML microservice, reducing latency on repeated queries.
+2. **Intelligent Redis Caching Layer**:
+   - Node.js API Gateway checks Redis before forwarding calls to the ML Engine.
+   - Identical campaign parameter queries return instantly from cache with a 3,600-second (1-hour) TTL.
 
-3. **Secure Authentication & RBAC**:
-   - JWT-based authentication issued via HTTP-only secure cookies (`token`).
-   - Password hashing with `bcryptjs` and role-based access control resolvers.
+3. **Secure Cookie-Based Authentication**:
+   - JWT tokens issued via `httpOnly`, `sameSite` secure cookies for seamless cross-origin request authentication with Apollo GraphQL.
 
-4. **Campaign CRUD & Daily Metrics Management**:
-   - Full campaign creation, search/filtering by platform, live status updates (`active`, `paused`, `draft`), and soft/hard deletion.
-   - Aggregated daily performance metrics tracking spend, impressions, clicks, conversions, CTR %, and CPC $.
+4. **Campaign CRUD & Performance Analytics**:
+   - Full campaign management (Create, Read, Search/Filter, Update, Delete).
+   - Daily performance metrics tracking spend, impressions, clicks, conversions, CTR %, and CPC $.
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Quick Start & Local Development
 
 ### Prerequisites
 
-- **Node.js** (v18+ recommended)
-- **Python** (v3.9+ recommended)
-- **Docker Desktop** (for PostgreSQL and Redis)
+- **Node.js** (v18+)
+- **Python** (v3.9+)
+- **Docker & Docker Compose**
 
 ---
 
-### Step-by-Step Setup Guide
+### Step-by-Step Setup
 
-#### 1. Start Infrastructure (PostgreSQL & Redis)
+#### 1. Launch Infrastructure Containers
 ```bash
 docker compose up -d
 ```
 
-#### 2. Configure & Start API Gateway (Node.js)
+#### 2. Start Node.js API Gateway
 ```bash
 cd api-gateway
 npm install
 
-# Initialize PostgreSQL Database Tables
+# Initialize PostgreSQL Schema & Seed Data
 node config/setupDB.js
 
 # Start API Gateway in Development Mode
 npm run dev
 ```
 
-#### 3. Start AI/ML Engine (Python FastAPI)
+#### 3. Start Python ML Engine
 ```bash
 cd ml-engine
+
 # Activate Virtual Environment (Windows)
 venv\Scripts\activate
 
-# Install requirements if needed, then run Uvicorn server:
+# Launch FastAPI Server
 uvicorn main:app --reload --port 8000
 ```
 
@@ -101,11 +115,11 @@ npm install
 npm run dev
 ```
 
-The web application will be accessible at: **`http://localhost:3000`**
+Visit the dashboard at **`http://localhost:3000`**
 
 ---
 
-## 📡 Key GraphQL API Endpoints
+## 📡 GraphQL API Reference
 
 ### Queries
 
@@ -137,7 +151,7 @@ query GetCampaignPrediction($platform: String!, $budget: Float!, $status: String
 }
 ```
 
-#### Get Daily Metrics
+#### Get Daily Performance Metrics
 ```graphql
 query GetDailyMetrics($campaignId: ID) {
   getDailyMetrics(campaignId: $campaignId) {
@@ -167,7 +181,7 @@ mutation CreateCampaign($name: String!, $platform: String!, $budget: Float!) {
 }
 ```
 
-#### User Registration & Login
+#### User Auth (Register & Login)
 ```graphql
 mutation Register($email: String!, $password: String!) {
   register(email: $email, password: $password) {

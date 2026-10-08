@@ -20,3 +20,9 @@ export const REGISTER_MUTATION = gql`
     }
   }
 `;
+
+export const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($email: String!, $newPassword: String!) {
+    resetPassword(email: $email, newPassword: $newPassword)
+  }
+`;

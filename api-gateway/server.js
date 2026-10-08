@@ -44,6 +44,11 @@ async function startServer() {
                 }
                 catch(err){
                     console.log("Invalid or expired token");
+                    res.clearCookie('token', {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+                    });
                 }
             }
 

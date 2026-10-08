@@ -1,10 +1,11 @@
 // api-gateway/src/graphql/resolvers.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { GraphQLError } = require('graphql');
 const { redisClient } = require('../config/redis');
 const { DateTimeResolver } = require('graphql-scalars');
 const { getAllCampaigns, createCampaign, updateCampaign, deleteCampaign, getDailyMetrics } = require('../models/campaignModel');
-const { createUser, getUserByEmail, getUserById } = require('../models/userModel');
+const { createUser, getUserByEmail, getUserById, updateUserPassword } = require('../models/userModel');
 
 const setAuthCookie = (res, user) => {
     const token = jwt.sign(
@@ -23,7 +24,9 @@ const setAuthCookie = (res, user) => {
 
 const requireAuth = (context) => {
     if (!context.user) {
-        throw new Error('Unauthorized: You must be logged in to perform this action.');
+        throw new GraphQLError('Unauthorized: You must be logged in to perform this action.', {
+            extensions: { code: 'UNAUTHENTICATED' }
+        });
     }
 };
 
@@ -31,8 +34,14 @@ const resolvers = {
     DateTime: DateTimeResolver,
 
     Query: {
-        getAllCampaigns: async () => await getAllCampaigns(),
-        getDailyMetrics: async (_, { campaignId }) => await getDailyMetrics(campaignId),
+        getAllCampaigns: async (_, __, context) => {
+            requireAuth(context);
+            return await getAllCampaigns();
+        },
+        getDailyMetrics: async (_, { campaignId }, context) => {
+            requireAuth(context);
+            return await getDailyMetrics(campaignId);
+        },
         me: async (_, __, context) => {
             if (!context.user) return null;
             return await getUserById(context.user.userId);
@@ -117,6 +126,19 @@ const resolvers = {
 
             setAuthCookie(context.res, user);
             return user;
+        },
+
+        resetPassword: async (_, { email, newPassword }) => {
+            const user = await getUserByEmail(email);
+            if (!user) {
+                throw new Error('No registered user found with this email address.');
+            }
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
+            if (!passwordRegex.test(newPassword)) {
+                throw new Error('New password must be at least 8 characters long and contain at least one letter and one number.');
+            }
+            await updateUserPassword(email, newPassword);
+            return true;
         },
 
         logout: async (_, __, context) => {

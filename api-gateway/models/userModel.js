@@ -45,4 +45,24 @@ const getUserById=async(id)=>{
     }
 };
 
-module.exports={createUser,getUserByEmail, getUserById};
+const updateUserPassword=async(email,plainTextPassword)=>{
+    try{
+        const salt=await bcrypt.genSalt(10);
+        const passwordHash=await bcrypt.hash(plainTextPassword,salt);
+
+        const query=`
+            UPDATE users SET password_hash = $1
+            WHERE email = $2
+            RETURNING id, email, role;
+        `;
+
+        const result=await pool.query(query,[passwordHash, email]);
+        return result.rows[0];
+    }
+    catch(error){
+        console.error('Error updating user password:',error);
+        throw new Error('Failed to update password');
+    }
+};
+
+module.exports={createUser,getUserByEmail, getUserById, updateUserPassword};

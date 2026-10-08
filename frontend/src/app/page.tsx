@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery, useMutation } from '@apollo/client/react';
 import { gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
@@ -43,8 +43,16 @@ export default function DashboardPage() {
   const [predBudget, setPredBudget] = useState('1000');
   const [predStatus, setPredStatus] = useState('active');
 
-  // GraphQL Hooks
-  const { data: meData } = useQuery<any>(ME_QUERY, { fetchPolicy: 'cache-and-network' });
+  // GraphQL Hooks with Session Guard
+  const { data: meData, loading: meLoading, error: meError } = useQuery<any>(ME_QUERY, {
+    fetchPolicy: 'network-only',
+  });
+
+  useEffect(() => {
+    if (!meLoading && (!meData?.me || meError)) {
+      router.push('/login?reason=expired');
+    }
+  }, [meLoading, meData, meError, router]);
   const { data: campaignsData, loading: campaignsLoading, refetch: refetchCampaigns } = useQuery<any>(
     GET_ALL_CAMPAIGNS,
     { fetchPolicy: 'cache-and-network' }
@@ -135,6 +143,16 @@ export default function DashboardPage() {
   // Aggregated totals
   const totalBudget = campaigns.reduce((acc: number, c: any) => acc + Number(c.budget || 0), 0);
   const activeCount = campaigns.filter((c: any) => c.status?.toLowerCase() === 'active').length;
+
+  // Render loading state while authenticating
+  if (meLoading || !meData?.me) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white space-y-4">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-gray-400">Verifying security credentials & active session...</p>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100 font-sans">

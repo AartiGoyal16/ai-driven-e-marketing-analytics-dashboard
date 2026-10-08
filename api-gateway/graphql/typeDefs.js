@@ -51,6 +51,7 @@ const typeDefs = `
 
         register(email: String!, password: String!): User!
         login(email: String!, password: String!): User!
+        resetPassword(email: String!, newPassword: String!): Boolean!
         logout: Boolean!
     }
 `;
